@@ -188,9 +188,12 @@ class DetectionPredictor(BasePredictor):
         return img
 
     def postprocess(self, preds, img, orig_img):
+        #conf & iou
         preds = ops.non_max_suppression(preds,
-                                        self.args.conf,
-                                        self.args.iou,
+                                        #self.args.conf,
+                                        #self.args.iou,
+                                        conf_thres=0.5,  # 之前可能是 0.25，现在改成 0.5
+                                        iou_thres=0.5,
                                         agnostic=self.args.agnostic_nms,
                                         max_det=self.args.max_det)
 
@@ -270,3 +273,21 @@ def predict(cfg):
 
 if __name__ == "__main__":
     predict()
+
+
+#Test Part:For checking parameter
+'''
+if __name__ == "__main__":
+    from ultralytics.yolo.engine.predictor import BasePredictor
+    from ultralytics.yolo.utils import DEFAULT_CONFIG
+
+    # 读取默认配置
+    cfg = DEFAULT_CONFIG
+
+    # 创建 BasePredictor 实例（不会运行检测，只是为了读取参数）
+    predictor = BasePredictor(cfg)
+
+    # 打印当前置信度和 IoU 阈值
+    print(f"当前 conf_threshold: {predictor.args.conf}, iou_threshold: {predictor.args.iou}")
+
+'''
