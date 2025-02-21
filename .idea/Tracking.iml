@@ -3,8 +3,9 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/content/YOLOv8-DeepSORT-Object-Tracking" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (SwiftMart)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="F:\anoconda\envs\YOLOv8-DeepSORT" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
