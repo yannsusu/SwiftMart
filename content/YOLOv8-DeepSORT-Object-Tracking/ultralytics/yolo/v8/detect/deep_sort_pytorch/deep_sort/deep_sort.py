@@ -23,6 +23,44 @@ class DeepSort(object):
         self.tracker = Tracker(
             metric, max_iou_distance=max_iou_distance, max_age=max_age, n_init=n_init)
 
+    def update_modify(self, bbox_xywh, confidences, oids, ori_img):
+        self.height, self.width = ori_img.shape[:2]
+
+        # 提取目标特征
+        features = self._get_features(bbox_xywh, ori_img)
+        bbox_tlwh = self._xywh_to_tlwh(bbox_xywh)
+
+        # 生成 DeepSORT 检测对象，并过滤低置信度目标
+        detections = [Detection(bbox_tlwh[i], conf, features[i], oid)
+                      for i, (conf, oid) in enumerate(zip(confidences, oids))
+                      if conf > self.min_confidence]
+
+        # 预测轨迹
+        self.tracker.predict()
+        self.tracker.update(detections)
+
+        # ✅ **严格限制最多 3 个 ID**
+        existing_tracks = sorted(self.tracker.tracks, key=lambda t: t.time_since_update)
+        if len(existing_tracks) > 3:
+            # 只保留最早的 3 个 ID
+            allowed_tracks = existing_tracks[:3]
+            self.tracker.tracks = allowed_tracks  # 直接替换 tracker 内部 tracks
+
+        # 输出 bbox 轨迹
+        outputs = []
+        for track in self.tracker.tracks:
+            if not track.is_confirmed() or track.time_since_update > 1:
+                continue
+            box = track.to_tlwh()
+            x1, y1, x2, y2 = self._tlwh_to_xyxy(box)
+            track_id = track.track_id
+            track_oid = track.oid
+            outputs.append(np.array([x1, y1, x2, y2, track_id, track_oid], dtype=np.int64))
+
+        if len(outputs) > 0:
+            outputs = np.stack(outputs, axis=0)
+        return outputs
+
     def update(self, bbox_xywh, confidences, oids, ori_img):
         self.height, self.width = ori_img.shape[:2]
         # generate detections

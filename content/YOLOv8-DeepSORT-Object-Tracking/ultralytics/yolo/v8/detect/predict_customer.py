@@ -22,13 +22,13 @@ from deep_sort_pytorch.deep_sort import DeepSort
 from collections import deque
 import numpy as np
 
-palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
-data_deque = {}
+palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1) #identify color
+data_deque = {} #store the data of object
 
-deepsort = None
+deepsort = None #
 
 
-def init_tracker():
+def init_tracker(): #配置Deepsort
     global deepsort
     cfg_deep = get_config()
     cfg_deep.merge_from_file("deep_sort_pytorch/configs/deep_sort.yaml")
@@ -43,7 +43,7 @@ def init_tracker():
 
 
 ##########################################################################################
-def xyxy_to_xywh(*xyxy):
+def xyxy_to_xywh(*xyxy): #yolov8的输出格式是 [x1, y1, x2, y2, confidence, class_id] 这里取 [x1,y1,x2,y2]
     """" Calculates the relative bounding box from absolute pixel values. """
     bbox_left = min([xyxy[0].item(), xyxy[2].item()])
     bbox_top = min([xyxy[1].item(), xyxy[3].item()])
@@ -56,7 +56,7 @@ def xyxy_to_xywh(*xyxy):
     return x_c, y_c, w, h
 
 
-def xyxy_to_tlwh(bbox_xyxy):
+def xyxy_to_tlwh(bbox_xyxy): #(top, left, width, height)转为该格式用于DeepSort
     tlwh_bboxs = []
     for i, box in enumerate(bbox_xyxy):
         x1, y1, x2, y2 = [int(i) for i in box]
@@ -73,20 +73,11 @@ def compute_color_for_labels(label):
     """
     Simple function that adds fixed color depending on the class
     """
-    if label == 0:  # person
-        color = (85, 45, 255)
-    elif label == 2:  # Car
-        color = (222, 82, 175)
-    elif label == 3:  # Motobike
-        color = (0, 204, 255)
-    elif label == 5:  # Bus
-        color = (0, 149, 255)
-    else:
-        color = [int((p * (label ** 2 - label + 1)) % 255) for p in palette]
+    color = (85, 45, 255)
     return tuple(color)
 
 
-def draw_border(img, pt1, pt2, color, thickness, r, d):
+def draw_border(img, pt1, pt2, color, thickness, r, d): #绘制检测框
     x1, y1 = pt1
     x2, y2 = pt2
     # Top left
@@ -192,7 +183,7 @@ class DetectionPredictor(BasePredictor):
         preds = ops.non_max_suppression(preds,
                                         #self.args.conf,
                                         #self.args.iou,
-                                        conf_thres=0.5,  # 之前可能是 0.25，现在改成 0.5
+                                        conf_thres=0.35,  # 之前可能是 0.25，现在改成 0.5
                                         iou_thres=0.5,
                                         agnostic=self.args.agnostic_nms,
                                         max_det=self.args.max_det)
@@ -251,6 +242,19 @@ class DetectionPredictor(BasePredictor):
             return log_string
 
         outputs = deepsort.update(xywhs, confss, oids, im0)
+        #id restrict
+        # 限制 ID 只能从 3 个已有的 ID 里选
+        '''
+                existing_ids = set([track.track_id for track in deepsort.tracker.tracks])  # 获取当前的 ID 集合
+
+        if len(existing_ids) > 3:
+            # 只保留最早出现的 3 个 ID，丢弃新的 ID
+            allowed_ids = sorted(existing_ids)[:3]  # 按 ID 排序，选择最早的 3 个
+            outputs = np.array([o for o in outputs if o[-2] in allowed_ids])  # 过滤掉多余的 ID
+        '''
+
+
+            #-------------
         if len(outputs) > 0:
             bbox_xyxy = outputs[:, :4]
             identities = outputs[:, -2]
@@ -264,7 +268,8 @@ class DetectionPredictor(BasePredictor):
 @hydra.main(version_base=None, config_path=str(DEFAULT_CONFIG.parent), config_name=DEFAULT_CONFIG.name)
 def predict(cfg):
     init_tracker()
-    cfg.model = cfg.model or "yolov8n.pt"
+    #cfg.model = cfg.model or r"E:\School\YoloDeepSort\YOLOv8-DeepSORT\content\yolov8s.pt"
+    cfg.model = r"E:\School\YoloDeepSort\YOLOv8-DeepSORT\yolov8m_803.pt"
     cfg.imgsz = check_imgsz(cfg.imgsz, min_dim=2)  # check image size
     cfg.source = cfg.source if cfg.source is not None else ROOT / "assets"
     predictor = DetectionPredictor(cfg)
