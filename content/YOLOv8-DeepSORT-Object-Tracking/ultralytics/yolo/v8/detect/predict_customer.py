@@ -18,7 +18,8 @@ from ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
 
 import cv2
 from deep_sort_pytorch.utils.parser import get_config
-from deep_sort_pytorch.deep_sort import DeepSort
+#from deep_sort_pytorch.deep_sort import DeepSort
+from deep_sort_pytorch.deep_sort.deep_sort_modify import DeepSort
 from collections import deque
 import numpy as np
 
@@ -32,8 +33,9 @@ def init_tracker(): #配置Deepsort
     global deepsort
     cfg_deep = get_config()
     cfg_deep.merge_from_file("deep_sort_pytorch/configs/deep_sort.yaml")
-
+    output_dir = "E:/School/YoloDeepSort/YOLOv8-DeepSORT/content/output"
     deepsort = DeepSort(cfg_deep.DEEPSORT.REID_CKPT,
+                        output_dir=output_dir,
                         max_dist=cfg_deep.DEEPSORT.MAX_DIST, min_confidence=cfg_deep.DEEPSORT.MIN_CONFIDENCE,
                         nms_max_overlap=cfg_deep.DEEPSORT.NMS_MAX_OVERLAP,
                         max_iou_distance=cfg_deep.DEEPSORT.MAX_IOU_DISTANCE,
