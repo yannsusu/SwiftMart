@@ -1,4 +1,5 @@
 import cv2
+import torch
 import random
 import numpy as np
 from ultralytics import YOLO
@@ -6,11 +7,33 @@ from scipy.spatial.distance import euclidean
 from Models.deep_sort_pytorch.utils.parser import get_config
 from Models.deep_sort_pytorch.deep_sort.deep_sort_modified import DeepSort
 
-# Load YOLOv8 model
+# Initialize YOLO model
 model = YOLO("../Models/best.pt")
 
-# Function to initialize DeepSORT
+# Open video file
+video_path = "../Dataset/final_test.mp4"  # Replace with your video file path
+cap = cv2.VideoCapture(video_path)
+
+shopping_cart = {}  # Dictionary to track objects and their counts
+
+# Get YOLOv8 class names
+class_names = model.names
+
+# Allowed items to track
+allowed_classes = [
+    "AD Calcium Milk", "Coca-Cola", "Daliyuan Soft Bread",
+    "Kiss Burn Braised Beef Flavor", "Kiss Burn Spicy Chicken Flavor",
+    "Lai Yi Tong Instant Noodles", "RIO Lychee Flavor",
+    "RIO Strawberry Flavor", "Tea Pi", "Want Want Senbei"
+]
+allowed_class_ids = [k for k, v in class_names.items() if v in allowed_classes]
+
+# Generate random colors for each class
+class_colors = {}
+
+# Initialize DeepSORT
 def init_tracker():
+    """Initialize the DeepSORT tracker."""
     global deepsort
     cfg_deep = get_config()
     cfg_deep.merge_from_file("../Models/deep_sort_pytorch/configs/deep_sort.yaml")
@@ -26,169 +49,126 @@ def init_tracker():
         use_cuda=True,
     )
 
-# Initialize DeepSORT tracker
-init_tracker()
-# tracker = DeepSort(max_age=50, n_init=3, embedder="mobilenet", max_iou_distance=0.7)
+
+# Function to process detections and update the shopping cart
+def process_detections(results):
+    """Process YOLO detection results and return valid detections."""
+    detections = []
+    for result in results:
+        for box in result.boxes:
+            cls = int(box.cls[0])
+
+            # Filter out non-relevant classes
+            if cls not in allowed_class_ids:
+                continue
+
+            x_center, y_center, w, h = box.xywh[0]
+            x_center, y_center, w, h = map(int, [x_center, y_center, w, h])
+
+            x1 = x_center - w // 2
+            y1 = y_center - h // 2
+            x2 = x_center + w // 2
+            y2 = y_center + h // 2
+
+            width = int(x2 - x1)
+            height = int(y2 - y1)
+            conf = float(box.conf[0])
+            detections.append(([x1, y1, width, height], conf, cls))
+    return detections
 
 
-# Open video file
-video_path = '../Dataset/final_test.mp4'  # Replace with your video file path
-cap = cv2.VideoCapture(video_path)
+# Function to update the tracker with detections
+def update_tracker(detections, frame):
+    """Update DeepSORT tracker and draw results."""
+    bbox_xywh = []
+    confidences = []
+    class_ids = []
 
-shopping_cart = {}
+    for det in detections:
+        (x1, y1, width, height), conf, cls_id = det
+        bbox_xywh.append([x1 + width // 2, y1 + height // 2, width, height])
+        confidences.append(conf)
+        class_ids.append(cls_id)
 
-# Frame skipping settings
-frame_skip = 1
-frame_count = 0
+    if bbox_xywh:
+        bbox_xywh = torch.Tensor(bbox_xywh)
+        confidences = torch.Tensor(confidences)
+        outputs = deepsort.update(bbox_xywh, confidences, class_ids, frame)
 
-# Get YOLOv8 class names
-class_names = model.names  # Dictionary mapping class IDs to names
+        return outputs
+    return []
 
-allowed_classes = ['AD Calcium Milk', 'Coca-Cola', 'Daliyuan Soft Bread', 'Kiss Burn Braised Beef Flavor', 'Kiss Burn Spicy Chicken Flavor', 'Lai Yi Tong Instant Noodles', 'RIO Lychee Flavor', 'RIO Strawberry Flavor', 'Tea Pi', 'Want Want Senbei']
-allowed_class_ids = [k for k, v in class_names.items() if v in allowed_classes]
 
-class_colors = {}
+# Function to handle object tracking and update shopping cart
+def track_objects(outputs, frame):
+    """Track objects and update the shopping cart."""
+    for output in outputs:
 
+        x1, y1, x2, y2, track_id, cls_id = output
+        cls_name = model.names[cls_id]
+        color = get_class_color(cls_name)
+
+        # Draw bounding box and label
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(
+            frame, f"ID: {track_id} {cls_name}", (x1, y1 - 10),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+        )
+
+        # Update shopping cart with item class count
+        if cls_name not in shopping_cart:
+            shopping_cart[cls_name] = 1
+        else:
+            shopping_cart[cls_name] += 1
+
+
+# Function to initialize the video capture
+def init_video_capture(video_path):
+    """Initialize video capture."""
+    return cv2.VideoCapture(video_path)
+
+
+# Function to get a random color for each object
 def get_class_color(cls_name):
+    """Generate a random color for each class."""
     if cls_name not in class_colors:
         class_colors[cls_name] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
     return class_colors[cls_name]
 
-people_seq = [
-    (68, 93, 523, 369, 1172),  # (id, x1, x2, y1, y2)
-]
 
+# Main processing loop
+def tracking():
+    """Main loop to process video frames and perform object tracking."""
+    video_path = "../Dataset/final_test.mp4"  # Replace with your video file path
+    cap = init_video_capture(video_path)
 
-# Parameters for "pick-up" detection
-N = 5  # Frames threshold to be considered as "picked up"
-speed_threshold = 5  # Speed threshold to detect slow movement
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-# Define variables for tracking whether the item is "picked up"
-picked_up_items = {}
-# Action received flag
-action_received = 'pick' # Can be 'pick', 'drop', 'fall', or 'none'
-
-# Function to calculate the speed of the object
-def calculate_speed(last_position, current_position, fps):
-    distance = euclidean(last_position, current_position)
-    return distance * fps
-
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
-
-    frame_id = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-
-    if action_received == 'pick':
-
+        # Perform object detection
         results = model(frame, conf=0.7, iou=0.5, agnostic_nms=True)
 
-        # Extract detection results (only for allowed classes)
-        detections = []
-        for result in results:
-            for box in result.boxes:
-                cls = int(box.cls[0])
+        # Process detections
+        detections = process_detections(results)
 
-                x_center, y_center, w, h = box.xywh[0]
-                x_center, y_center, w, h = map(int, [x_center, y_center, w, h])
+        # Update the tracker with new detections
+        outputs = update_tracker(detections, frame)
 
-                x1 = x_center - w // 2
-                y1 = y_center - h // 2
-                x2 = x_center + w // 2
-                y2 = y_center + h // 2
+        # Track objects and update the shopping cart
+        track_objects(outputs, frame)
 
-                width = abs(x2 - x1)
-                height = abs(y2 - y1)
-                conf = float(box.conf[0])
-                detections.append(([x1, y1, width, height], conf, cls))
+        # Display results
+        cv2.imshow("YOLOv8 + DeepSORT Tracking", frame)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
 
-        # Perform object tracking using DeepSORT
-        tracks = tracker.update_tracks(detections, frame=frame)
+    # Release resources
+    cap.release()
+    cv2.destroyAllWindows()
 
-        for track in tracks:
-            if not track.is_confirmed():  # Fixed spelling: is_confirmed
-                continue
 
-            track_id = track.track_id
-            ltrb = track.to_ltrb()
-            x1, y1, x2, y2 = map(int, ltrb)
-
-            cls_id = getattr(track, 'det_class', None)
-            if cls_id is None or cls_id not in allowed_class_ids:
-                continue
-
-            cls_name = class_names[cls_id]
-            color = get_class_color(cls_name)
-
-            # Initialize tracking for the item if not done already
-            if track_id not in picked_up_items:
-                picked_up_items[track_id] = {
-                    "frames_in_box": 0,
-                    "last_position": None,
-                    "is_picked_up": False,
-                    "last_speed": 0,
-                    "person_frame": None
-                }
-
-            # Update tracking status
-            item_status = picked_up_items[track_id]
-            last_position = item_status["last_position"]
-            current_position = (x_center, y_center)
-
-            # Check if item is within person's box
-            person_in_box = False
-            for person in people_seq:
-                person_x1, person_y1, person_x2, person_y2, _ = person
-                if x1 > person_x1 and x2 < person_x2 and y1 > person_y1 and y2 < person_y2:
-                    person_in_box = True
-                    item_status["person_frame"] = frame_id  # Store the frame when the item is near a person
-                    break
-
-            # If the item is in the frame, increase the frame count
-            if person_in_box:
-                item_status["frames_in_box"] += 1
-
-            # Check if item has been in the frame for more than N frames
-            if item_status["frames_in_box"] >= N:
-                # Check if item is moving with the person (by comparing position movement)
-                if last_position:
-                    speed = calculate_speed(last_position, current_position, fps=30)  # Assume 30 FPS
-                    if speed < speed_threshold:  # If speed is slow, item might be picked up
-                        item_status["is_picked_up"] = True
-
-                item_status["last_position"] = current_position
-
-            # Handle products has been picked up
-            if item_status["is_picked_up"] and track_id not in shopping_cart:
-                shopping_cart[track_id] = (cls_name, 1)
-            elif item_status["is_picked_up"]:
-                shopping_cart[track_id] = (cls_name, shopping_cart[track_id][1] + 1)
-
-            # Draw bounding box and text (ID + Class Name)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, f"ID: {track_id} {cls_name}", (x1, y1 - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-    elif action_received == 'drop':
-        for track_id in list(picked_up_items.keys()):
-            if track_id in shopping_cart:
-                del shopping_cart[track_id]
-            picked_up_items[track_id]["is_picked_up"] = False
-            picked_up_items[track_id]["frames_in_box"] = 0
-
-    # Display results
-    cv2.namedWindow("YOLOv8 + DeepSORT Tracking", cv2.WINDOW_NORMAL)  # Create a resizable window
-
-    frame_height, frame_width = frame.shape[:2]
-    window_scale = 0.8  # Set window scale
-    cv2.resizeWindow("YOLOv8 + DeepSORT Tracking", int(frame_width * window_scale), int(frame_height * window_scale))
-    cv2.imshow("YOLOv8 + DeepSORT Tracking", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release resources
-cap.release()
-cv2.destroyAllWindows()
-
-print("Shopping Cart:", shopping_cart)
+if __name__ == "__main__":
+    init_tracker()
+    tracking()
