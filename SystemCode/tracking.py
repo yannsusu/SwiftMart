@@ -6,7 +6,7 @@ from ultralytics import YOLO
 from scipy.spatial.distance import euclidean
 from Models.deep_sort_pytorch.utils.parser import get_config
 from Models.deep_sort_pytorch.deep_sort.deep_sort_modified import DeepSort
-
+#
 # Initialize YOLO model
 model = YOLO("../Models/best.pt")
 
