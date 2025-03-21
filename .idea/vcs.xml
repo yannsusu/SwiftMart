@@ -2,7 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/SwiftMart" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/content/YOLOv8-DeepSORT-Object-Tracking" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Models/deep_sort_pytorch" vcs="Git" />
   </component>
 </project>
