@@ -1,9 +1,7 @@
 import cv2
 import torch
 import random
-import numpy as np
 from ultralytics import YOLO
-from scipy.spatial.distance import euclidean
 from Models.deep_sort_pytorch.utils.parser import get_config
 from Models.deep_sort_pytorch.deep_sort.deep_sort_modified import DeepSort
 
