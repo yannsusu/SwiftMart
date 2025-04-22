@@ -1,0 +1,19 @@
+{
+    "2": {
+        "items": {
+            "Daliyuan Soft Bread": 2,
+            "RIO Lychee Flavor": 1,
+            "Tea Pi": 1,
+            "AD Calcium Milk": 1
+        },
+        "total_price": 20
+    },
+    "3": {
+        "items": {
+            "RIO Lychee Flavor": 3,
+            "Daliyuan Soft Bread": 2,
+            "Tea Pi": 1
+        },
+        "total_price": 27
+    }
+}
