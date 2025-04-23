@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="37cadfff-5d71-4607-8fcb-da2fa4d823bd" name="Changes" comment="system stacking" />
+    <list default="true" id="37cadfff-5d71-4607-8fcb-da2fa4d823bd" name="Changes" comment="system stacking">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,7 +25,7 @@
         <entry key="$PROJECT_DIR$" value="e7b986e666e17ab6acc625d8897cff2e27a667ab" />
       </map>
     </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/Models/YOLOv8-DeepSORT" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -49,34 +51,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.1.executor&quot;: &quot;Run&quot;,
-    &quot;Python.applyModels.executor&quot;: &quot;Run&quot;,
-    &quot;Python.dataFilter.executor&quot;: &quot;Run&quot;,
-    &quot;Python.deep_sort_modified.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.labeling.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.modelTraining.executor&quot;: &quot;Run&quot;,
-    &quot;Python.serialization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.splitData.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tracker.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.tracking (1).executor&quot;: &quot;Debug&quot;,
-    &quot;Python.tracking.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tracking1.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;&lt;unknown&gt;&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ynee/Documents/NUS/SwiftMart/Models/deep_sort_pytorch/deep_sort&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.1.executor": "Run",
+    "Python.applyModels.executor": "Run",
+    "Python.dataFilter.executor": "Run",
+    "Python.deep_sort_modified.executor": "Debug",
+    "Python.labeling.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.modelTraining.executor": "Run",
+    "Python.serialization.executor": "Run",
+    "Python.splitData.executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.tracker.executor": "Debug",
+    "Python.tracking (1).executor": "Debug",
+    "Python.tracking.executor": "Run",
+    "Python.tracking1.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/ynee/Documents/NUS/SwiftMart/Models/deep_sort_pytorch/deep_sort",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "vcs.Git",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Models/deep_sort_pytorch/deep_sort" />
@@ -129,6 +131,9 @@
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration>$USER_HOME$/.subversion</configuration>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="37cadfff-5d71-4607-8fcb-da2fa4d823bd" name="Changes" comment="" />
@@ -152,6 +157,8 @@
       <workItem from="1745313872248" duration="425000" />
       <workItem from="1745393798532" duration="2610000" />
       <workItem from="1745397492691" duration="754000" />
+      <workItem from="1745399951097" duration="198000" />
+      <workItem from="1745400165842" duration="438000" />
     </task>
     <task id="LOCAL-00001" summary="test">
       <option name="closed" value="true" />
@@ -201,7 +208,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745399821993</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="system stacking">
+      <option name="closed" value="true" />
+      <created>1745399976486</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1745399976486</updated>
+    </task>
+    <task id="LOCAL-00008" summary="system stacking">
+      <option name="closed" value="true" />
+      <created>1745400031024</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1745400031024</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
