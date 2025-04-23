@@ -1,0 +1,10 @@
+DEEPSORT:
+  REID_CKPT: "C:/Users/xuchi/Desktop/SwiftMart/SwiftMart_tracking_product/Models/deep_sort_pytorch/deep_sort/deep/checkpoint/ckpt.t7"
+  #REID_CKPT: "deep_sort_pytorch/deep_sort/deep/checkpoint/osnet_x0_25_market1501.pth"
+  MAX_DIST: 0.2 #0.2
+  MIN_CONFIDENCE: 0.5 #0.5
+  NMS_MAX_OVERLAP: 0.5 #NMS
+  MAX_IOU_DISTANCE: 0.5 #IOU
+  MAX_AGE: 300 #300
+  N_INIT: 15 #15
+  NN_BUDGET: 3 #3
