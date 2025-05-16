@@ -23,6 +23,7 @@ The system is trained on three main datasets:
    - Self-recorded video clips: 215 segments annotated for four key actions — Pick, Put, Drop, Take
    - Train/test split: 80/20
    - Used to train a TimeSformer-based spatiotemporal model
+   - Already Uploaded in Github Please see dataset file
 
 3. **Product Detection & Tracking Dataset**:
    - Self-recorded videos: 3,228 images covering 10 distinct product classes
